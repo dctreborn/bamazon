@@ -94,20 +94,15 @@ function buyItem(inventory) {
 //if amount to buy <= stock, process order and calc price
 //else, display not enough and bring back to main menu
 function checkStock(sold, id, price) {
-    // console.log("sold: " + sold);
-    // console.log("id: " + id);
-    // console.log("price: " + price);
-
 	var query = "SELECT * FROM products WHERE item_id = ?";
 
 	connection.query(query, [id], function(err, results) {
 		if (err) throw err;
-        console.log(results);
+
 		var item = results[0].product_name;
-        console.log(item);
 		var stock = results[0].stock_quantity;
 
-		if (results.stock_quantity < sold) {
+		if (stock < sold) {
 			console.log("Not enough in stock.");
 			console.log("Try again later.");
 			main();
@@ -117,8 +112,6 @@ function checkStock(sold, id, price) {
 			connection.query(query, [(stock - sold), id], function(err, results) {
 				//calcuate cost
 				var total = sold * price;
-
-                console.log(JSON.stringify(results));
 
 				console.log("Bought %s %s for %s gold.", sold, item, total);
 			});
