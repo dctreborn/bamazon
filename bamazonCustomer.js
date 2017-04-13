@@ -72,30 +72,15 @@ function buyItem(inventory) {
         }]).then(function(buy) {
         	//slice item number from given string and UPDATE products SET stock_quantity = stock_quantity - bought WHERE item_id = id
         	var item = buy.item;
-        	var id = item.slice(item.indexOf("#") + 1, item.indexOf(":"));
-        	var price = item.slice(item.indexOf("Price") + 8, item.indexOf(", Stock"));
+        	var id = parseInt(item.slice(item.indexOf("#") + 1, item.indexOf(":")));
+        	var price = parseInt(item.slice(item.indexOf("Price") + 7, item.indexOf(", Stock")));
 
         	//ask amount to buy
         	inquirer.prompt([
         	{
         		type: "input",
         		message: "How many do you want to buy?",
-        		name: "bought",
-      //   		validate: function (input) {
-				  //   // Declare function as asynchronous, and save the done callback 
-				  //   var done = this.async();
-				 	// console.log("" + typeof input);
-				  //   // Do async stuff 
-				  //   setTimeout(function () {
-				  //     if (typeof input !== 'number') {
-				  //       // Pass the return value in the done callback 
-				  //       done('You need to provide a number');
-				  //       return;
-				  //     }
-				  //     // Pass the return value in the done callback 
-				  //     done(null, true);
-				  //   }, 3000);
-				  // }
+        		name: "bought"
         	}
         	]).then(function(stock){
         		var numBought = Math.max(stock.bought, 0); //cannot have value less than 0
@@ -109,27 +94,31 @@ function buyItem(inventory) {
 //if amount to buy <= stock, process order and calc price
 //else, display not enough and bring back to main menu
 function checkStock(sold, id, price) {
+    // console.log("sold: " + sold);
+    // console.log("id: " + id);
+    // console.log("price: " + price);
 
-	var query = "SELECT * FROM products WHERE ?";
+	var query = "SELECT * FROM products WHERE item_id = ?";
 
-	connection.query(query, [{item_id: id}], function(err, results) {
+	connection.query(query, [id], function(err, results) {
 		if (err) throw err;
-
-		console.log(results);
-
-		var item = results.product_name;
-		var stock = results.stock_quantity;
+        console.log(results);
+		var item = results[0].product_name;
+        console.log(item);
+		var stock = results[0].stock_quantity;
 
 		if (results.stock_quantity < sold) {
 			console.log("Not enough in stock.");
 			console.log("Try again later.");
 			main();
 		} else {
-			var query = "UPDATE products SET ? WHERE ?";
+			var query = "UPDATE products SET stock_quantity = ? WHERE item_id = ?";
 
-			connection.query(query, [{stock_quantity: stock - sold, item_id: id}], function(err, results) {
+			connection.query(query, [(stock - sold), id], function(err, results) {
 				//calcuate cost
 				var total = sold * price;
+
+                console.log(JSON.stringify(results));
 
 				console.log("Bought %s %s for %s gold.", sold, item, total);
 			});
