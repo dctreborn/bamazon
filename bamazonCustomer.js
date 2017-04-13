@@ -1,13 +1,22 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
-var password = require("./db.js").db;
+var connection;
 
-var connection = mysql.createConnection({
-    host: "localhost",
-    port: 3306,
-    user: "root",
-    password: password,
-    database: "Bamazon"
+inquirer.prompt([{
+    message: "Enter database password",
+    name: "password",
+    type: "password"
+}]).then(function(db) {
+
+    connection = mysql.createConnection({
+        host: "localhost",
+        port: 3306,
+        user: "root",
+        password: db.password,
+        database: "Bamazon"
+    });
+
+    main();
 });
 
 //RPG themed bamazon
@@ -72,21 +81,21 @@ function buyItem(inventory) {
         		type: "input",
         		message: "How many do you want to buy?",
         		name: "bought",
-        		validate: function (input) {
-				    // Declare function as asynchronous, and save the done callback 
-				    var done = this.async();
-				 
-				    // Do async stuff 
-				    setTimeout(function () {
-				      if (typeof input !== 'number') {
-				        // Pass the return value in the done callback 
-				        done('You need to provide a number');
-				        return;
-				      }
-				      // Pass the return value in the done callback 
-				      done(null, true);
-				    }, 3000);
-				  }
+      //   		validate: function (input) {
+				  //   // Declare function as asynchronous, and save the done callback 
+				  //   var done = this.async();
+				 	// console.log("" + typeof input);
+				  //   // Do async stuff 
+				  //   setTimeout(function () {
+				  //     if (typeof input !== 'number') {
+				  //       // Pass the return value in the done callback 
+				  //       done('You need to provide a number');
+				  //       return;
+				  //     }
+				  //     // Pass the return value in the done callback 
+				  //     done(null, true);
+				  //   }, 3000);
+				  // }
         	}
         	]).then(function(stock){
         		var numBought = Math.max(stock.bought, 0); //cannot have value less than 0
@@ -106,7 +115,10 @@ function checkStock(sold, id, price) {
 	connection.query(query, [{item_id: id}], function(err, results) {
 		if (err) throw err;
 
+		console.log(results);
+
 		var item = results.product_name;
+		var stock = results.stock_quantity;
 
 		if (results.stock_quantity < sold) {
 			console.log("Not enough in stock.");
@@ -115,16 +127,13 @@ function checkStock(sold, id, price) {
 		} else {
 			var query = "UPDATE products SET ? WHERE ?";
 
-			connection.query(query, [{stock_quantity: stock_quantity - sold, item_id: id}], function(err, results) {
+			connection.query(query, [{stock_quantity: stock - sold, item_id: id}], function(err, results) {
 				//calcuate cost
 				var total = sold * price;
 
-				console.log("Bought %s %s for %i gold.", sold, item, total);
+				console.log("Bought %s %s for %s gold.", sold, item, total);
 			});
 
 		}
 	});
 }
-
-//start program
-main();
