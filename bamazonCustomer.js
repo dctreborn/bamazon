@@ -84,6 +84,21 @@ function buyItem(inventory) {
         inquirer.prompt([{
             type: "input",
             message: "How many do you want to buy?",
+            validate: function(input) {
+                // Declare function as asynchronous, and save the done callback 
+                var done = this.async();
+
+                // Do async stuff 
+                setTimeout(function() {
+                    if (typeof parseInt(input) !== 'number') {
+                        // Pass the return value in the done callback 
+                        done('You need to provide a number');
+                        return;
+                    }
+                    // Pass the return value in the done callback 
+                    done(null, true);
+                }, 3000);
+            },
             name: "bought"
         }]).then(function(stock) {
             var numBought = Math.max(stock.bought, 0); //cannot have value less than 0
