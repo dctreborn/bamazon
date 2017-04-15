@@ -12,6 +12,8 @@ Bamazon is a node app that mimics a marketplace where you can buy items based on
 
 * Stock will decrease and retain value with each program call
 
+![alt text](https://raw.githubusercontent.com/rukaroa/bamazon/master/example.PNG "Example")
+
 # Dependencies
 inquirer
 
