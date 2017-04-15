@@ -90,7 +90,7 @@ function buyItem(inventory) {
 
                 // Do async stuff 
                 setTimeout(function() {
-                    if (typeof parseInt(input) !== 'number') {
+                    if (isNaN(input)) {
                         // Pass the return value in the done callback 
                         done('You need to provide a number');
                         return;
